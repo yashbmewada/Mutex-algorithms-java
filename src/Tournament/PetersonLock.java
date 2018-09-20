@@ -1,14 +1,16 @@
 package Tournament;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
 public class PetersonLock implements Lock{
 
 
-	private boolean[] flag = new boolean[2];
-	private int victim;
+	private AtomicBoolean[] flag = new AtomicBoolean[2];
+	private AtomicInteger victim;
 
 	
 	
@@ -19,10 +21,10 @@ public class PetersonLock implements Lock{
 		int me = Integer.parseInt(Thread.currentThread().getName());
 		int other = 1 - me;
 		
-		flag[me] = true;
-		victim = me;
+		flag[me].set(true);
+		victim.set(me);;
 		
-		while(flag[other] && victim == me)
+		while(flag[other].get() && victim.intValue() == me)
 		{
 			//wait
 		}
@@ -52,7 +54,7 @@ public class PetersonLock implements Lock{
 	public void unlock() {
 		// TODO Auto-generated method stub
 		int me = Integer.parseInt(Thread.currentThread().getName());
-		flag[me] = false;
+		flag[me].set(false);
 	}
 
 	@Override

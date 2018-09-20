@@ -2,19 +2,25 @@ package Bakery;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
 public class Bakery implements Lock{
 
-	boolean[] flag;
-	int[] label;
-	int numThreads;
+	AtomicBoolean[] flag;
+	AtomicInteger[] label;
+	volatile int numThreads;
 	
 	public Bakery(int numThreads) {
 		this.numThreads = numThreads;
-		flag = new boolean[numThreads];
-		label = new int[numThreads];
+		flag = new AtomicBoolean[numThreads];
+		label = new AtomicInteger[numThreads];
+		for(int i=0;i<numThreads; i++){
+			flag[i] = new AtomicBoolean(false);
+			label[i] = new AtomicInteger(0);
+		}
 		System.out.println(Arrays.toString(flag));
 		System.out.println(Arrays.toString(label));
 		
@@ -24,8 +30,8 @@ public class Bakery implements Lock{
 	@Override
 	public void lock() {
 		int i = Integer.parseInt(Thread.currentThread().getName());
-		flag[i] = true;
-		label[i] = getMaxLabelId() + 1;
+		flag[i].set(true);
+		label[i].set(getMaxLabelId() + 1);
 		while(checkFlagsAndLabel(i)) {
 			//wait;
 		}
@@ -38,9 +44,9 @@ public class Bakery implements Lock{
 		// TODO Auto-generated method stub
 		for(int k=0;k<numThreads;k++) { 
 			if(k != i) {
-				int[] currentPair = {label[k],k};
-				int[] threadPair = {label[i],i};
-				if(flag[k] && (currentPair[0]<threadPair[0] && currentPair[1]<threadPair[1])){
+				int[] currentPair = {label[k].intValue(),k};
+				int[] threadPair = {label[i].intValue(),i};
+				if(flag[k].get() && (currentPair[0]<threadPair[0] && currentPair[1]<threadPair[1])){
 					return true;
 				}
 			}
@@ -51,11 +57,12 @@ public class Bakery implements Lock{
 
 	private int getMaxLabelId() {
 		// TODO Auto-generated method stub
-		int max = label[0];
-		for(int num:label) {
-			max = Math.max(max, num);
+		AtomicInteger max = label[0];
+		for(AtomicInteger num:label) {
+			int valueToSet = Math.max(max.intValue(), num.intValue());
+			max.set(valueToSet);
 		}
-		return max;
+		return max.intValue();
 	}
 
 
@@ -80,7 +87,7 @@ public class Bakery implements Lock{
 	@Override
 	public void unlock() {
 		// TODO Auto-generated method stub
-		flag[Integer.parseInt(Thread.currentThread().getName())] = false;
+		flag[Integer.parseInt(Thread.currentThread().getName())].set(false);
 	}
 
 	@Override
