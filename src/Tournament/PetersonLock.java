@@ -8,9 +8,18 @@ import java.util.concurrent.locks.Lock;
 
 public class PetersonLock implements Lock{
 
+	//Assigning IDs as ThreadLocal. This will help in automatically setting ID, and storing them as a thread calls.
+
+	final private ThreadLocal<Integer> local_thread_id = new ThreadLocal<Integer>(){
+		final private AtomicInteger threadId = new AtomicInteger(0);
+
+		public  Integer initialValue(){ return threadId.getAndIncrement() % 2;}
+	};
+
+
 
 	private AtomicBoolean[] flag = new AtomicBoolean[2];
-	private AtomicInteger victim;
+	private volatile int victim;
 
 	
 	
@@ -18,13 +27,13 @@ public class PetersonLock implements Lock{
 	@Override
 	public void lock() {
 		// TODO change me and other.
-		int me = Integer.parseInt(Thread.currentThread().getName());
+		int me = local_thread_id.get();
 		int other = 1 - me;
 		
 		flag[me].set(true);
-		victim.set(me);;
+		victim = me;
 		
-		while(flag[other].get() && victim.intValue() == me)
+		while(flag[other].get() && victim == me)
 		{
 			//wait
 		}
@@ -53,7 +62,7 @@ public class PetersonLock implements Lock{
 	@Override
 	public void unlock() {
 		// TODO Auto-generated method stub
-		int me = Integer.parseInt(Thread.currentThread().getName());
+		int me = local_thread_id.get();
 		flag[me].set(false);
 	}
 
