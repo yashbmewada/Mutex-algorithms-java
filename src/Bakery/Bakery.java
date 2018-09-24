@@ -9,6 +9,15 @@ import java.util.concurrent.locks.Lock;
 
 public class Bakery implements Lock{
 
+	//Assigning IDs as ThreadLocal. This will help in automatically setting ID, and storing them as a thread calls.
+
+    final private ThreadLocal<Integer> local_thread_id = new ThreadLocal<Integer>(){
+        final private AtomicInteger threadId = new AtomicInteger(0);
+
+        public  Integer initialValue(){ return threadId.getAndIncrement();}
+    };
+
+
 	AtomicBoolean[] flag;
 	AtomicInteger[] label;
 	volatile int numThreads;
@@ -29,7 +38,7 @@ public class Bakery implements Lock{
 	
 	@Override
 	public void lock() {
-		int i = Integer.parseInt(Thread.currentThread().getName());
+		int i = local_thread_id.get();
 		flag[i].set(true);
 		label[i].set(getMaxLabelId() + 1);
 		while(checkFlagsAndLabel(i)) {
@@ -86,8 +95,8 @@ public class Bakery implements Lock{
 
 	@Override
 	public void unlock() {
-		// TODO Auto-generated method stub
-		flag[Integer.parseInt(Thread.currentThread().getName())].set(false);
+		int id = local_thread_id.get();
+		flag[id].set(false);
 	}
 
 	@Override

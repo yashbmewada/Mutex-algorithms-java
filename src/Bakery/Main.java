@@ -14,8 +14,8 @@ public class Main {
 		
 		
 		for(int i=0;i<NUM_THREADS;i++) {
-			threads[i] = createNewThread(i, bakery);
-			System.out.println("Thread Spawned number : " + threads[i].getName());
+			threads[i] = createNewThread(bakery);
+			System.out.println("Thread Spawned number : ");
 			threads[i].start();
 			
 		}
@@ -25,7 +25,7 @@ public class Main {
 		
 		
 	}
-	private static Thread createNewThread(int i, Bakery bakery) {
+	private static Thread createNewThread( Bakery bakery) {
 		
 		
 		
@@ -41,8 +41,7 @@ public class Main {
 					System.out.println("count after update : " + count);
 					}finally{bakery.unlock();}
 					System.out.println("Thread outside lock : " +Thread.currentThread().getName());
-				}, 
-				String.valueOf(i)); // name of the thread;
+				}); // name of the thread;
 		
 		return threadToSpawn;
 	}
