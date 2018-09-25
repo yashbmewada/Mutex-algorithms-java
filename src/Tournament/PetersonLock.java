@@ -37,9 +37,14 @@ public class PetersonLock implements Lock{
 		{
 			//wait
 		}
-		
-		
 	}
+	 public void lock(int i) {
+	        int me = i;
+			int other = 1 - me;
+	        flag[me].set(true); 
+	        victim = me ; // you go first
+	        while ( flag[other].get() && victim == me) {}; // wait
+	    }
 
 	@Override
 	public void lockInterruptibly() throws InterruptedException {
@@ -65,6 +70,10 @@ public class PetersonLock implements Lock{
 		int me = local_thread_id.get();
 		flag[me].set(false);
 	}
+	public void unlock(int i){
+        int me= i;
+        flag[me].set(false); 
+    }
 
 	@Override
 	public Condition newCondition() {
