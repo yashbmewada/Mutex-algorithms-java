@@ -30,8 +30,6 @@ public class Bakery implements Lock{
 			flag[i] = new AtomicBoolean(false);
 			label[i] = new AtomicInteger(0);
 		}
-		System.out.println(Arrays.toString(flag));
-		System.out.println(Arrays.toString(label));
 		
 	}
 	

@@ -5,20 +5,38 @@ public class Main {
 	private static int count = 0;
 	public static final int NUM_THREADS = 4;
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		int NUM_THREADS = 0;
 		int cores = Runtime.getRuntime().availableProcessors();
 		System.out.println(cores);
-		final Bakery bakery = new Bakery(NUM_THREADS);
-		
-		Thread[] threads = new Thread[NUM_THREADS];
-		
-		
-		for(int i=0;i<NUM_THREADS;i++) {
-			threads[i] = createNewThread(bakery);
-			System.out.println("Thread Spawned number : " + threads[i].getName());
-			threads[i].start();
+		for(int j=1; j<=cores; j++) {
+			count = 0;
+			NUM_THREADS = j;
+			System.out.println("NUMBER OF THREADS   = " + NUM_THREADS);
+			final Bakery bakery = new Bakery(NUM_THREADS);
 			
+			Thread[] threads = new Thread[NUM_THREADS];
+			
+			
+			for(int i=0;i<NUM_THREADS;i++) {
+				threads[i] = createNewThread(bakery);
+				threads[i].start();
+			}
+			
+			for(int i=0; i<NUM_THREADS; i++) {
+				try {
+					threads[i].join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					System.out.println("Failed" );
+				}
+			}
+			
+			System.out.println("COUNT FOR " + NUM_THREADS + "  = " + count);
+			
+			
+		
 		}
+			
 		
 		
 		
@@ -36,7 +54,6 @@ public class Main {
 					//critical section
 					countNum();
 					}finally{bakery.unlock();}
-					System.out.println("Thread outside lock : "  + count);
 				}); // name of the thread;
 		
 		return threadToSpawn;

@@ -13,7 +13,7 @@ public class PetersonLock implements Lock{
 	final private ThreadLocal<Integer> local_thread_id = new ThreadLocal<Integer>(){
 		final private AtomicInteger threadId = new AtomicInteger(0);
 
-		public  Integer initialValue(){ return threadId.getAndIncrement() % 2;}
+		public  Integer initialValue(){ return threadId.getAndIncrement();}
 	};
 
 
@@ -21,13 +21,17 @@ public class PetersonLock implements Lock{
 	private AtomicBoolean[] flag = new AtomicBoolean[2];
 	private volatile int victim;
 
-	
+	public PetersonLock(){
+        for(int i=0 ; i<flag.length ; ++i)
+            flag[i] = new AtomicBoolean();
+    }
+    
 	
 	
 	@Override
 	public void lock() {
 		// TODO change me and other.
-		int me = local_thread_id.get();
+		int me = local_thread_id.get() % 2;
 		int other = 1 - me;
 		
 		flag[me].set(true);
@@ -39,7 +43,7 @@ public class PetersonLock implements Lock{
 		}
 	}
 	 public void lock(int i) {
-	        int me = i;
+	        int me = i % 2;
 			int other = 1 - me;
 	        flag[me].set(true); 
 	        victim = me ; // you go first
@@ -67,11 +71,12 @@ public class PetersonLock implements Lock{
 	@Override
 	public void unlock() {
 		// TODO Auto-generated method stub
-		int me = local_thread_id.get();
+		int me = local_thread_id.get() % 2;
 		flag[me].set(false);
 	}
+	
 	public void unlock(int i){
-        int me= i;
+        int me= i % 2;
         flag[me].set(false); 
     }
 

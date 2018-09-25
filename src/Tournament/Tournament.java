@@ -47,7 +47,7 @@ public class Tournament{
 
 	public void unlock(){
 		int i = local_thread_id.get();
-		ArrayList<Integer> list = new ArrayList(this.MAX_DEPTH + 1);
+		ArrayList<Integer> list = new ArrayList<>(this.MAX_DEPTH + 1);
 		int start = 0;
 		list.add(i);
 		//to find out what to unlock

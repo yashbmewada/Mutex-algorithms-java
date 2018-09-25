@@ -1,54 +1,68 @@
 
 package Tournament;
 
+
 public class TournamentTest {
-	private final static int THREADS = 8;
-	private final static int COUNT = 1024;
-	private final static int PER_THREAD = COUNT / THREADS;
-	Thread[] thread = new Thread[THREADS];
-	int counter = 0;
-
-	// Peterson instance = new Peterson();
-	Tournament instance = new Tournament(THREADS);
-
-	public void test() throws Exception {
-		System.out.println("test parallel");
-		// ThreadID.reset();
-		for (int i = 0; i < THREADS; i++) {
-			thread[i] = new MyThread();
-		}
-		for (int i = 0; i < THREADS; i++) {
-			thread[i].start();
-		}
-		for (int i = 0; i < THREADS; i++) {
-			thread[i].join();
-		}
-
-		if (counter != COUNT) {
-			System.out.println("Wrong! " + counter + " " + COUNT);
-		}
-	}
-
-	class MyThread extends Thread {
-		public void run() {
-			for (int i = 0; i < PER_THREAD; i++) {
-				instance.lock();
+	private static int count = 0;
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		int NUM_THREADS = 0;
+		int cores = Runtime.getRuntime().availableProcessors();
+		System.out.println(cores);
+		for(int j=1; j<=cores; j++) {
+			count = 0;
+			NUM_THREADS = j;
+			System.out.println("NUMBER OF THREADS   = " + NUM_THREADS);
+			final Tournament tournament = new Tournament(NUM_THREADS);
+			
+			Thread[] threads = new Thread[NUM_THREADS];
+			
+			
+			for(int i=0;i<NUM_THREADS;i++) {
+				threads[i] = createNewThread(tournament);
+				threads[i].start();
+			}
+			
+			for(int i=0; i<NUM_THREADS; i++) {
 				try {
-					counter = counter + 1;
-				} finally {
-					instance.unlock();
+					threads[i].join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					System.out.println("Failed" );
 				}
 			}
+			
+			System.out.println("COUNT FOR " + NUM_THREADS + "  = " + count);
+			
+			
+		
 		}
+			
+		
+	}
+	private static Thread createNewThread( Tournament tournament) {
+		
+		
+		
+		Thread threadToSpawn = new Thread(
+				() ->  {
+					try {
+					tournament.lock();
+					//critical section
+					countNum();
+					}finally{tournament.unlock();}
+					
+				}); // name of the thread;
+		
+		return threadToSpawn;
+	}
+	
+	private static void countNum() {
+		for(int i=0; i<1000000; i++) {
+			count++;
+		}
+		
 	}
 
-	public static void main(String[] args) {
-		TournamentTest mpt = new TournamentTest(); // Would like to be able to pass this # of threads
-
-		try {
-			mpt.test();
-		} 
-		catch (Exception e) {
-		}
-	}
 }
