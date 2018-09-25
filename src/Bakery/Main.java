@@ -43,18 +43,19 @@ public class Main {
 		
 		
 	}
-	private static Thread createNewThread( Bakery bakery) {
+	private static Thread createNewThread(final Bakery bakery) {
 		
 		
 		
-		Thread threadToSpawn = new Thread(
-				() ->  {
+		Thread threadToSpawn = new Thread(new Runnable(){ public void run() {
 					try {
 					bakery.lock();
 					//critical section
 					countNum();
 					}finally{bakery.unlock();}
-				}); // name of the thread;
+				}}
+
+); // name of the thread;
 		
 		return threadToSpawn;
 	}

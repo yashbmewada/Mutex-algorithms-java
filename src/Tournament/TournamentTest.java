@@ -41,19 +41,20 @@ public class TournamentTest {
 			
 		
 	}
-	private static Thread createNewThread( Tournament tournament) {
+	private static Thread createNewThread( final Tournament tournament) {
 		
 		
 		
 		Thread threadToSpawn = new Thread(
-				() ->  {
+				new Runnable(){
+				public void run(){
 					try {
 					tournament.lock();
 					//critical section
 					countNum();
 					}finally{tournament.unlock();}
 					
-				}); // name of the thread;
+				}}); // name of the thread;
 		
 		return threadToSpawn;
 	}
